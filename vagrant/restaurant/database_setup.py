@@ -12,7 +12,7 @@ class Restaurant(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(80), nullable=False)
 
-class Menu(Base):
+class MenuItem(Base):
     __tablename__ = 'menu_item'
     id = Column(Integer, primary_key=True)
     name = Column(String(80), nullable=False)
