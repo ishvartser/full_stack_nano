@@ -1,4 +1,7 @@
 <html>
+    <head>
+        <link rel=stylesheet type=text/css href='{{ url_for("static", filename="styles.css") }} '>
+    </head>
     <body>
         <a href='{{ url_for("showRestaurants") }}'>Home</a>
         <h1>{{ restaurant.name }} Menu</h1>
