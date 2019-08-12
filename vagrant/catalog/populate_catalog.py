@@ -56,21 +56,59 @@ def create_item(name, description, category, user) {
     return item
 }
 
-user_1 = create_user(
-    name='Jane Appleseed',
-    email='jane.appleseed@gmail.com'
-)
+users = [
+    {'name': 'Jane Appleseed', 'email': 'jane.appleseed@gmail.com'},
+    {'name': 'Bo Crocker', 'email': 'bo.crocker@gmail.com'},
+    {'name': 'Clint Rosewood', 'email': 'clint.rosewood@gmail.com'},
+    {'name': 'Ann Nickols', 'email': 'ann.nickols@gmail.com'}
+]
 
-category_1 = create_category(
-    name='Golf',
-    user=user_1
-)
+catalog_golf = {
+    'name': 'golf',
+    'items': [
+        {'name': 'golf ball', 'description': 'a ball used for golf'}
+    ]
+}
+catalog_volleyball = {
+    'name': 'volleyball',
+    'items': [
+        {'name': 'volleyball', 'description': 'a ball used for volleyball'}
+    ]
+}
+catalog_ultimate = {
+    'name': 'ultimate',
+    'items': [
+        {'name': 'frisbee', 'description': 'the disc we pass in ultimate frisbee'},
+        {'name': 'headband', 'description': 'it keeps your sweat from your eyeballs'}
+    ]
+}
+catalog_horseback_racing = {
+    'name': 'horseback racing',
+    'items': []
+]
 
-item_1 = create_item(
-    name='Golf ball',
-    description='A ball used for golf.',
-    category=category_1,
-    user=user_1
-)
 
-print('Done populating the catalog db!')
+def create_catalog_row(catalog_user, catalog_category) {
+    user = create_user(
+        name=catalog_user['name'],
+        email=catalog_user['email']
+    )
+    category = create_category(
+        name=catalog_category['name'],
+        user=user
+    )
+    for item in catalog_category['items']:
+        create_item(
+            name=item['name'],
+            description=item['description'],
+            category=category,
+            user=user
+        )
+
+
+create_catalog_row(users[0], catalog_golf)
+create_catalog_row(users[1], catalog_volleyball)
+create_catalog_row(users[2], catalog_ultimate)
+create_catalog_row(users[3], catalog_horseback_racing)
+
+print('Done populating the catalog DB!')
