@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md">
+            <h2> Categories </h2>
+            {% if categories %}
+                <a href="{{url_for('new_category')}}" ><button>Create a New Category</button></a>
+                {% for category in categories %}
+                    <h3>{{category.name}}</h3>
+                {% endfor %}
+            {% else %}
+                <a href="{{url_for('new_category')}}" ><button>Create a New Category</button></a>
+            {% endif %}
+        </div>
+        <div class="col-md">
+            {% if items %}
+                <h2>{{category.name}} Items</h2>
+                {% for it in items %}
+                    <h3>{{ it.name }}</h3>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

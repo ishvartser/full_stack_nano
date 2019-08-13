@@ -26,16 +26,16 @@ DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
 
-# JSON to view categories.
-@app.route('/category/json')
+# JSON to view catelog.
+@app.route('/catalog/json')
 def catalog_json():
     items = session.query(Category).all()
     return jsonify(categories=[i.serialize for i in items])
 
 
-# Show all categories.
+# Show all categories and items in the catalog.
 @app.route('/')
-@app.route('/category/')
+@app.route('/catalog')
 def show_category():
     categories = session.query(Category).all()
     # TODO: Update this to only return the latest items.
@@ -43,8 +43,22 @@ def show_category():
     return render_template('category.html', categories=categories, items=items)
 
 
-# Add a new category.
-@app.route('/category/new/', methods=['GET', 'POST'])
+# Show all items for a specific category in the catalog.
+@app.route('/catalog/<int:category_id>/items')
+def show_category_items(category_id):
+    categories = session.query(Category).all()
+    category = session.query(Category).filter_by(
+        id=category_id).one_or_none()
+    items = session.query(Item).filter_by(category_id=category_id).all()
+    return render_template(
+        'category_items.html',
+        categories=categories,
+        category=category,
+        items=items)
+
+
+# Add a new category in the catalog.
+@app.route('/catalog/new', methods=['GET', 'POST'])
 def new_category():
     if request.method == 'POST':
         new_category = Category(name=request.form['name'], user_id=user_id)
