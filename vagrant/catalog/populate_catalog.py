@@ -20,7 +20,7 @@ session = DBSession()
 
 
 # Create a user.
-def create_user(name, email) {
+def create_user(name, email):
     user = User(
         name=name,
         email=email
@@ -28,11 +28,10 @@ def create_user(name, email) {
     session.add(user)
     session.commit()
     return user
-}
 
 
 # Create a category.
-def create_category(name, user) {
+def create_category(name, user):
     category = Category(
         name=name,
         user_id=user.id
@@ -40,11 +39,10 @@ def create_category(name, user) {
     session.add(category)
     session.commit()
     return category
-}
 
 
 # Create an item.
-def create_item(name, description, category, user) {
+def create_item(name, description, category, user):
     item = Item(
         name=name,
         description=description,
@@ -54,7 +52,6 @@ def create_item(name, description, category, user) {
     session.add(item)
     session.commit()
     return item
-}
 
 users = [
     {'name': 'Jane Appleseed', 'email': 'jane.appleseed@gmail.com'},
@@ -85,10 +82,10 @@ catalog_ultimate = {
 catalog_horseback_racing = {
     'name': 'horseback racing',
     'items': []
-]
+}
 
 
-def create_catalog_row(catalog_user, catalog_category) {
+def create_catalog_row(catalog_user, catalog_category):
     user = create_user(
         name=catalog_user['name'],
         email=catalog_user['email']
@@ -106,9 +103,10 @@ def create_catalog_row(catalog_user, catalog_category) {
         )
 
 
-create_catalog_row(users[0], catalog_golf)
-create_catalog_row(users[1], catalog_volleyball)
-create_catalog_row(users[2], catalog_ultimate)
-create_catalog_row(users[3], catalog_horseback_racing)
+if __name__ == '__main__':
+    create_catalog_row(users[0], catalog_golf)
+    create_catalog_row(users[1], catalog_volleyball)
+    create_catalog_row(users[2], catalog_ultimate)
+    create_catalog_row(users[3], catalog_horseback_racing)
 
-print('Done populating the catalog DB!')
+    print('Done populating the catalog DB!')

@@ -26,12 +26,34 @@ DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
 
-# JSON APIs to view Catalog info.
-@app.route('/catalogs/json')
+# JSON to view categories.
+@app.route('/category/json')
 def catalog_json():
     items = session.query(Category).all()
     return jsonify(categories=[i.serialize for i in items])
 
+
+# Show all categories.
+@app.route('/')
+@app.route('/category/')
+def show_category():
+    categories = session.query(Category).all()
+    # TODO: Update this to only return the latest items.
+    items = session.query(Item).all()
+    return render_template('category.html', categories=categories, items=items)
+
+
+# Add a new category.
+@app.route('/category/new/', methods=['GET', 'POST'])
+def new_category():
+    if request.method == 'POST':
+        new_category = Category(name=request.form['name'], user_id=user_id)
+        session.add(new_category)
+        flash('New Category %s created!' % new_category.name)
+        session.commit()
+        return redirect(url_for('show_category'))
+    else:
+        return render_template('category_new.html')
 
 if __name__ == '__main__':
     app.secret_key = 'super_secret_key'
