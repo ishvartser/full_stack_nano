@@ -63,13 +63,17 @@ users = [
 catalog_golf = {
     'name': 'golf',
     'items': [
-        {'name': 'golf ball', 'description': 'a ball used for golf'}
+        {'name': 'golf ball', 'description': 'a ball used for golf'},
+        {'name': 'clubs', 'description': 'hit the ball with these'},
+        {'name': 'golf cart', 'description': 'used for transportation around the golf course'},
     ]
 }
 catalog_volleyball = {
     'name': 'volleyball',
     'items': [
-        {'name': 'volleyball', 'description': 'a ball used for volleyball'}
+        {'name': 'volleyball', 'description': 'a ball used for volleyball'},
+        {'name': 'net', 'description': 'the net divides two halves of the volleyball court'},
+        {'name': 'sand', 'description': 'the volleyball court floor is made of this!'}
     ]
 }
 catalog_ultimate = {

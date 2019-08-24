@@ -69,6 +69,20 @@ def new_category():
     else:
         return render_template('category_new.html')
 
+
+# Show a description for a specific item in a category.
+@app.route('/catalog/<int:category_id>/items/<int:item_id>')
+def show_item(category_id, item_id):
+    category = session.query(Category).filter_by(
+        id=category_id).one_or_none()
+    item = session.query(Item).filter_by(
+        id=item_id, category_id=category_id).one_or_none()
+    return render_template(
+        'item.html',
+        category=category,
+        item=item)
+
+
 if __name__ == '__main__':
     app.secret_key = 'super_secret_key'
     app.debug = True
