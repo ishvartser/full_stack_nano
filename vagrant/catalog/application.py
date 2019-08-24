@@ -36,7 +36,7 @@ def catalog_json():
 # Show all categories and items in the catalog.
 @app.route('/')
 @app.route('/catalog')
-def show_category():
+def show_categories():
     categories = session.query(Category).all()
     # TODO: Update this to only return the latest items.
     items = session.query(Item).all()
@@ -65,7 +65,7 @@ def new_category():
         session.add(new_category)
         flash('New Category %s created!' % new_category.name)
         session.commit()
-        return redirect(url_for('show_category'))
+        return redirect(url_for('show_categories'))
     else:
         return render_template('category_new.html')
 
