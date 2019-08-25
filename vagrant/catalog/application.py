@@ -111,7 +111,6 @@ def edit_item(category_id, item_id):
     item = session.query(Item).filter_by(
         id=item_id, category_id=category_id
     ).one_or_none()
-
     category = session.query(Category).filter_by(
         id=category_id).one_or_none()
 
@@ -130,6 +129,28 @@ def edit_item(category_id, item_id):
         return render_template(
             'item_edit.html',
             categories=categories,
+            category=category,
+            item=item)
+
+
+@app.route('/catalog/<int:category_id>/items/<int:item_id>/delete', methods=['GET', 'POST'])
+def delete_item(category_id, item_id):
+    category = session.query(Category).filter_by(
+        id=category_id).one_or_none()
+    item = session.query(Item).filter_by(
+        id=item_id, category_id=category_id).one_or_none()
+
+    if request.method == 'POST':
+        session.delete(item)
+        session.commit()
+        flash('{category_name} item {item_name} deleted!'.format(
+            category_name=category.name,
+            item_name=item.name))
+        return redirect(url_for(
+            'show_category_items', category_id=category.id))
+    else:
+        return render_template(
+            'item_delete.html',
             category=category,
             item=item)
 
