@@ -7,7 +7,7 @@
                 <div class="card-body">
                     <h5 class="card-title">{{ item.name }}</h5>
                     <p class="card-text">Description: {{ item.description }}</p>
-                    <a href="#" class="btn btn-primary">Edit Item</a>
+                    <a href="{{ url_for('edit_item', category_id=category.id, item_id=item.id) }}" class="btn btn-primary">Edit Item</a>
                 </div>
             </div>
         </div>

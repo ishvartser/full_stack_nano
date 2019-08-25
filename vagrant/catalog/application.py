@@ -75,7 +75,6 @@ def new_category():
 @app.route('/catalog/new_item', methods=['GET', 'POST'])
 def new_item():
     if request.method == 'POST':
-        print("FORM: ", request.form)
         category = session.query(Category).filter_by(
             name=request.form['category']).one_or_none()
         item = Item(
@@ -104,6 +103,35 @@ def show_item(category_id, item_id):
         'item.html',
         category=category,
         item=item)
+
+
+# Edit a category's item.
+@app.route('/catalog/<int:category_id>/items/<int:item_id>/edit', methods=['GET', 'POST'])
+def edit_item(category_id, item_id):
+    item = session.query(Item).filter_by(
+        id=item_id, category_id=category_id
+    ).one_or_none()
+
+    category = session.query(Category).filter_by(
+        id=category_id).one_or_none()
+
+    if request.method == 'POST':
+        if request.form['name']:
+            item.name = request.form['name']
+        session.add(item)
+        session.commit()
+        flash('{category_name} Item {item_name} updated!'.format(
+            category_name=category.name,
+            item_name=item.name))
+        return redirect(
+            url_for('show_category_items', category_id=category.id))
+    else:
+        categories = session.query(Category).all()
+        return render_template(
+            'item_edit.html',
+            categories=categories,
+            category=category,
+            item=item)
 
 
 if __name__ == '__main__':
