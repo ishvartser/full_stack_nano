@@ -133,6 +133,7 @@ def edit_item(category_id, item_id):
             item=item)
 
 
+# Delete a category's item.
 @app.route('/catalog/<int:category_id>/items/<int:item_id>/delete', methods=['GET', 'POST'])
 def delete_item(category_id, item_id):
     category = session.query(Category).filter_by(
