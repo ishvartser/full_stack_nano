@@ -58,16 +58,39 @@ def show_category_items(category_id):
 
 
 # Add a new category in the catalog.
-@app.route('/catalog/new', methods=['GET', 'POST'])
+@app.route('/catalog/new_category', methods=['GET', 'POST'])
 def new_category():
     if request.method == 'POST':
-        new_category = Category(name=request.form['name'], user_id=user_id)
-        session.add(new_category)
-        flash('New Category %s created!' % new_category.name)
+        category = Category(name=request.form['name'], user_id=1)
+        session.add(category)
+        flash('New Category %s created!' % category.name)
         session.commit()
-        return redirect(url_for('show_categories'))
+        return redirect(
+            url_for('show_category_items', category_id=category.id))
     else:
-        return render_template('category_new.html')
+        return render_template('category_add.html')
+
+
+# Add a new item in the catalog.
+@app.route('/catalog/new_item', methods=['GET', 'POST'])
+def new_item():
+    if request.method == 'POST':
+        print("FORM: ", request.form)
+        category = session.query(Category).filter_by(
+            name=request.form['category']).one_or_none()
+        item = Item(
+            name=request.form['name'],
+            description=request.form['description'],
+            category_id=category.id,
+            user_id=1)
+        session.add(category)
+        flash('New Item %s created!' % item.name)
+        session.commit()
+        return redirect(
+            url_for('show_category_items', category_id=category.id))
+    else:
+        categories = session.query(Category).all()
+        return render_template('item_add.html', categories=categories)
 
 
 # Show a description for a specific item in a category.
