@@ -12,6 +12,15 @@
         </div>
         <div class="col-md">
             <h2>Latest Items</h2>
+            {% if items != [] %}
+                {% for item in items %}
+                    <h3><a href="{{ url_for('show_item', category_id=item.category_id, item_id=item.id) }}">{{item.name}}</a>
+                        <em style="color:grey">({{item.category.name}})</em>
+                    </h3>
+                {% endfor %}
+            {% else %}
+                <h3>No recent items.</h3>
+            {% endif %}
         </div>
     </div>
 </div>

@@ -1,3 +1,4 @@
+import datetime
 import httplib2
 import json
 import random
@@ -38,8 +39,10 @@ def catalog_json():
 @app.route('/catalog')
 def show_categories():
     categories = session.query(Category).all()
-    # TODO: Update this to only return the latest items.
-    items = session.query(Item).all()
+    current_time = datetime.datetime.utcnow()
+    one_week_ago = current_time - datetime.timedelta(weeks=1)
+    items = session.query(Item).filter(
+        Item.updated_on > one_week_ago).all()
     return render_template('category.html', categories=categories, items=items)
 
 
