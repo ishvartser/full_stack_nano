@@ -1,2 +1,5 @@
 # Catalog db file.
 catalog.db
+
+# Credentials.
+credentials/*

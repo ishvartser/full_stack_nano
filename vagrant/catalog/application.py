@@ -17,6 +17,9 @@ from models import Base, User, Item, Category
 
 
 app = Flask(__name__)
+client_id = json.loads(
+    open('credentials/client_secret_oauth.json', 'r').read()
+)['web']['client_id']
 
 # Connect to Database and create database session
 engine = create_engine(
@@ -27,7 +30,7 @@ DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
 
-# JSON to view catelog.
+# JSON to view catalog.
 @app.route('/catalog/json')
 def catalog_json():
     items = session.query(Category).all()
@@ -157,6 +160,19 @@ def delete_item(category_id, item_id):
             'item_delete.html',
             category=category,
             item=item)
+
+
+"""AUTHENTICATION ENDPOINTS"""
+
+
+# Create anti-forgery state token
+@app.route('/login')
+def show_login():
+    state = ''.join(
+      random.choice(string.ascii_uppercase + string.digits) for x in xrange(32)
+    )
+    login_session['state'] = state
+    return render_template('login.html', state=state, client_id=client_id)
 
 
 if __name__ == '__main__':
