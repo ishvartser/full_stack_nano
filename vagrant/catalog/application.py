@@ -168,12 +168,41 @@ def delete_item(category_id, item_id):
 
 # Create anti-forgery state token
 @app.route('/login')
-def show_login():
+def login():
     state = ''.join(
       random.choice(string.ascii_uppercase + string.digits) for x in xrange(32)
     )
     login_session['state'] = state
     return render_template('login.html', state=state, client_id=client_id)
+
+
+@app.route('/logout')
+def logout():
+    if login_session.get['access_token']:
+        response = make_response(json.dumps(
+            'Current user not connected.'), 401)
+        response.headers['Content-Type'] = 'application/json'
+        return response
+
+    url = 'https://accounts.google.com/o/oauth2/revoke?token={}'.format(
+        login_session['access_token'])
+
+    http_obj = httplib2.Http()
+    result = http_obj.request(url, 'GET')[0]
+
+    if result['status'] == '200':
+        del session['logged_in']
+        del session['access_token']
+        del session['google_id']
+        del session['username']
+        del session['email']
+        del session['picture']
+        del session['provider']
+        flash('You have been logged out.')
+        return redirect(url_for('show_categories'))
+    else:
+        flash('Failed to revoke token for given user!')
+        return redirect(url_for('show_categories'))
 
 
 @app.route('/connect', methods=['POST'])
