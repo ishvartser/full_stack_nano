@@ -5,8 +5,9 @@ import random
 import requests
 import string
 
-from flask import Flask, render_template, request
-from flask import redirect, jsonify, url_for, flash, make_response
+from flask import (
+    Flask, render_template, request, redirect,
+    jsonify, url_for, flash, make_response)
 from flask import session as login_session
 from oauth2client.client import flow_from_clientsecrets
 from oauth2client.client import FlowExchangeError
@@ -173,6 +174,97 @@ def show_login():
     )
     login_session['state'] = state
     return render_template('login.html', state=state, client_id=client_id)
+
+
+@app.route('/connect', methods=['POST'])
+def connect():
+    """Exchange the one-time authorization code for a token and
+    store the token in the session."""
+    # Ensure that the request is not a forgery and that the user sending
+    # this connect request is the expected user.
+    if request.args.get('state', '') != login_session['state']:
+        response = make_response(json.dumps('Invalid state parameter.'), 401)
+        response.headers['Content-Type'] = 'application/json'
+        return response
+
+    code = request.data
+
+    try:
+        # Upgrade the authorization code into a credentials object
+        oauth_flow = flow_from_clientsecrets(
+            'client_secret_oauth.json', scope='')
+        oauth_flow.redirect_uri = 'postmessage'
+        credentials = oauth_flow.step2_exchange(code)
+    except FlowExchangeError:
+        response = make_response(
+            json.dumps('Failed to upgrade the authorization code.'), 401)
+        response.headers['Content-Type'] = 'application/json'
+        return response
+
+    url = 'https://www.googleapis.com/oauth2/v1/tokeninfo?access_token={}' \
+        .format(credentials.access_token)
+
+    http_obj = httplib2.Http()
+    result = json.loads(http_obj.request(url, 'GET')[1])
+
+    # Check for errors.
+    if result.get('error'):
+        response = make_response(json.dumps(result.get('error')), 500)
+        response.headers['Content-Type'] = 'application/json'
+        return response
+
+    # Verification against token IDs.
+    google_id = credentials.id_token['sub']
+    if result['user_id'] != google_id:
+        response = make_response(
+            json.dumps('Token user ID does not match given user ID.'), 401)
+        response.headers['Content-Type'] = 'application/json'
+        return response
+
+    if result['issued_to'] != client_id:
+        response = make_response(
+            json.dumps('Token client ID does not match that of the app.'), 401)
+        response.headers['Content-Type'] = 'application/json'
+        return response
+
+    session_access_token = login_session.get('access_token')
+    session_google_id = login_session.get('google_id')
+
+    # Check if user is already logged in.
+    if session_access_token and google_id == session_google_id:
+        response = make_response(
+            json.dumps('Current user is already logged in.'), 200)
+        response.headers['Content-Type'] = 'application/json'
+        return response
+
+    # Store the token.
+    login_session['access_token'] = credentials.access_token
+    login_session['google_id'] = google_id
+
+    # Store user information.
+    user_info_url = 'https://www.googleapis.com/oauth2/v1/userinfo'
+    user_info_response = requests.get(
+        user_info_url, params={
+            'access_token': credentials.access_token,
+            'alt': 'json'}
+    )
+
+    login_session['logged_in'] = True
+    login_session['provider'] = 'google'
+    login_session['username'] = user_info_response.json()['name']
+    login_session['picture'] = user_info_response.json()['picture']
+    login_session['email'] = user_info_response.json()['email']
+
+    flash(
+        'Hi, {}. You are logged in!'.format(
+            login_session['username'])
+    )
+
+    return render_template(
+        'login_success.html',
+        username=login_session['username'],
+        image_url=login_session['picture']
+    )
 
 
 if __name__ == '__main__':
