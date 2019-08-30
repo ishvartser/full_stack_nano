@@ -1,24 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <link href='//fonts.googleapis.com/css?family=Roboto:400,300,700' rel='stylesheet' type='text/css'>
   <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
   <link rel=stylesheet type=text/css href="{{ url_for('static', filename='styles.css') }}">
   <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-
-  <!--google -->
   <script src="//apis.google.com/js/platform.js?onload=init" async defer></script>`
-
-  <meta name="google-signin-client_id"
-    content="{{ client_id }}">
-
+  <meta name="google-signin-client_id" content="{{ client_id }}">
 </head>
-
 <body>
   <div class="container">
-
-
     <!-- start Google Start Login -->
     <h1>Sign with your Google Account</h1>
     <div id="gbutton" ></div>
@@ -29,8 +20,6 @@
             scope: 'email',
             onsuccess: offlineAccess
           });
-
-
         });
       }
       function offlineAccess(googleUser) {
@@ -48,7 +37,7 @@
           console.log(resp);
           $.ajax({
             type: "POST",
-            url: "{{url_for('gconnect')}}?state={{state}}",
+            url: "{{url_for('connect')}}?state={{state}}",
             processData: false,
             contentType: 'application/octet-stream; charset=utf-8',
             data: auth_code,
@@ -61,15 +50,6 @@
         });
       }
     </script>
-
-    <!-- start Google End Login -->
-
-
-
-
-
-
-
   </div>
 </body>
 

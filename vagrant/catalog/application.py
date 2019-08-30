@@ -47,7 +47,11 @@ def show_categories():
     one_week_ago = current_time - datetime.timedelta(weeks=1)
     items = session.query(Item).filter(
         Item.updated_on > one_week_ago).all()
-    return render_template('category.html', categories=categories, items=items)
+    return render_template(
+        'category.html',
+        categories=categories,
+        items=items,
+        user=login_session.get('username'))
 
 
 # Show all items for a specific category in the catalog.
@@ -178,26 +182,26 @@ def login():
 
 @app.route('/logout')
 def logout():
-    if login_session.get['access_token']:
+    if not login_session.get('access_token'):
         response = make_response(json.dumps(
             'Current user not connected.'), 401)
         response.headers['Content-Type'] = 'application/json'
         return response
 
-    url = 'https://accounts.google.com/o/oauth2/revoke?token={}'.format(
-        login_session['access_token'])
+    # Revoke the access token.
+    response = requests.post(
+        'https://accounts.google.com/o/oauth2/revoke',
+        params={'token': login_session['access_token']},
+        headers={'content-type': 'application/x-www-form-urlencoded'})
 
-    http_obj = httplib2.Http()
-    result = http_obj.request(url, 'GET')[0]
-
-    if result['status'] == '200':
-        del session['logged_in']
-        del session['access_token']
-        del session['google_id']
-        del session['username']
-        del session['email']
-        del session['picture']
-        del session['provider']
+    if response.status_code == 200:
+        del login_session['logged_in']
+        del login_session['access_token']
+        del login_session['google_id']
+        del login_session['username']
+        del login_session['email']
+        del login_session['picture']
+        del login_session['provider']
         flash('You have been logged out.')
         return redirect(url_for('show_categories'))
     else:
@@ -221,7 +225,7 @@ def connect():
     try:
         # Upgrade the authorization code into a credentials object
         oauth_flow = flow_from_clientsecrets(
-            'client_secret_oauth.json', scope='')
+            'credentials/client_secret_oauth.json', scope='')
         oauth_flow.redirect_uri = 'postmessage'
         credentials = oauth_flow.step2_exchange(code)
     except FlowExchangeError:

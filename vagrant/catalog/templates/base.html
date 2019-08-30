@@ -15,11 +15,10 @@
             <a href="{{url_for('new_category')}}" class="btn btn-outline-light" role="button">Add Category</a>
             <a href="{{url_for('new_item')}}" class="btn btn-outline-light" role="button">Add Item</a>
             {% if user %}
-            <!-- TODO: pass in `user` into this template from the application code -->
             <p>Signed in as {{ user }}</p>
-            <a href="{{ url_for('logout') }}">Log Out</a>
+            <a href="{{ url_for('logout') }}" class="btn btn-outline-light" role="button">Log Out</a>
             {% else %}
-            <a href="{{ url_for('login') }}">Log In</a>
+            <a href="{{ url_for('login') }}" class="btn btn-outline-light" role="button">Log In</a>
             {% endif %}
         </nav>
         <div class="row">
