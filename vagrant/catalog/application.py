@@ -31,11 +31,35 @@ DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
 
-# JSON to view catalog.
-@app.route('/catalog/json')
-def catalog_json():
-    items = session.query(Category).all()
-    return jsonify(categories=[i.serialize for i in items])
+# JSON for all categories.
+@app.route('/catalog/categories/json')
+def categories_json():
+    categories = session.query(Category).all()
+    return jsonify(catalog=[i.serialize for i in categories])
+
+
+# JSON for all the items for a category.
+@app.route('/catalog/categories/<int:category_id>/json')
+def category_json(category_id):
+    category = session.query(Category).filter_by(id=category_id).one()
+    items = session.query(Item).filter_by(
+        category_id=category_id).all()
+    return jsonify(items=[i.serialize for i in items])
+
+
+# JSON for all items.
+@app.route('/catalog/items/json')
+def items_json():
+    items = session.query(Item).all()
+    return jsonify(items=[i.serialize for i in items])
+
+
+# JSON for a specific item in a category.
+@app.route('/catalog/categories/<int:category_id>/items/<int:item_id>/json')
+def item_json(category_id, item_id):
+    """Return JSON for an item"""
+    item = session.query(Item).filter_by(id=item_id).one()
+    return jsonify(item=item.serialize)
 
 
 # Show all categories and items in the catalog.
@@ -118,7 +142,9 @@ def show_item(category_id, item_id):
 
 
 # Edit a category's item.
-@app.route('/catalog/<int:category_id>/items/<int:item_id>/edit', methods=['GET', 'POST'])
+@app.route(
+    '/catalog/<int:category_id>/items/<int:item_id>/edit',
+    methods=['GET', 'POST'])
 def edit_item(category_id, item_id):
     item = session.query(Item).filter_by(
         id=item_id, category_id=category_id
@@ -146,7 +172,9 @@ def edit_item(category_id, item_id):
 
 
 # Delete a category's item.
-@app.route('/catalog/<int:category_id>/items/<int:item_id>/delete', methods=['GET', 'POST'])
+@app.route(
+    '/catalog/<int:category_id>/items/<int:item_id>/delete',
+    methods=['GET', 'POST'])
 def delete_item(category_id, item_id):
     category = session.query(Category).filter_by(
         id=category_id).one_or_none()
