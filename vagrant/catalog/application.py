@@ -72,7 +72,8 @@ def show_category_items(category_id):
 @app.route('/catalog/new_category', methods=['GET', 'POST'])
 def new_category():
     if request.method == 'POST':
-        category = Category(name=request.form['name'], user_id=1)
+        category = Category(
+            name=request.form['name'], user_id=login_session['user_id'])
         session.add(category)
         flash('New Category %s created!' % category.name)
         session.commit()
@@ -92,7 +93,7 @@ def new_item():
             name=request.form['name'],
             description=request.form['description'],
             category_id=category.id,
-            user_id=1)
+            user_id=login_session['user_id'])
         session.add(category)
         flash('New Item %s created!' % item.name)
         session.commit()
@@ -170,9 +171,9 @@ def delete_item(category_id, item_id):
 """AUTHENTICATION ENDPOINTS"""
 
 
-# Create anti-forgery state token
 @app.route('/login')
 def login():
+    # Create anti-forgery state token
     state = ''.join(
       random.choice(string.ascii_uppercase + string.digits) for x in xrange(32)
     )
@@ -212,16 +213,16 @@ def logout():
 @app.route('/connect', methods=['POST'])
 def connect():
     """Exchange the one-time authorization code for a token and
-    store the token in the session."""
-    # Ensure that the request is not a forgery and that the user sending
-    # this connect request is the expected user.
+    store the token in the session. Ensure that the request is
+    not a forgery and that the user sending this connect request
+    is the expected user."""
+
     if request.args.get('state', '') != login_session['state']:
         response = make_response(json.dumps('Invalid state parameter.'), 401)
         response.headers['Content-Type'] = 'application/json'
         return response
 
     code = request.data
-
     try:
         # Upgrade the authorization code into a credentials object
         oauth_flow = flow_from_clientsecrets(
@@ -288,16 +289,12 @@ def connect():
     login_session['picture'] = user_info_response.json()['picture']
     login_session['email'] = user_info_response.json()['email']
 
-    flash(
-        'Hi, {}. You are logged in!'.format(
-            login_session['username'])
-    )
+    flash('Hi, {}. You are logged in!'.format(login_session['username']))
 
     return render_template(
         'login_success.html',
         username=login_session['username'],
-        image_url=login_session['picture']
-    )
+        image_url=login_session['picture'])
 
 
 if __name__ == '__main__':

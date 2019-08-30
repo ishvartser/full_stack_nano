@@ -12,7 +12,7 @@
         </div>
         <div class="col-md">
             {% if items %}
-            <h4>{{category.name}} Items</h4>
+            <h4>{{category.name}} Items ({{ items|length }})</h4>
             <div class="card">
                 <ul class="list-group list-group-flush">
                 {% for it in items %}
