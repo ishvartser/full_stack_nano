@@ -31,14 +31,14 @@ DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
 
-# JSON for all categories.
+# JSON endpoint for all categories.
 @app.route('/catalog/categories/json')
 def categories_json():
     categories = session.query(Category).all()
     return jsonify(catalog=[i.serialize for i in categories])
 
 
-# JSON for all the items for a category.
+# JSON endpoint for all items in a category.
 @app.route('/catalog/categories/<int:category_id>/json')
 def category_json(category_id):
     category = session.query(Category).filter_by(id=category_id).one()
@@ -47,14 +47,14 @@ def category_json(category_id):
     return jsonify(items=[i.serialize for i in items])
 
 
-# JSON for all items.
+# JSON endpoint for all items.
 @app.route('/catalog/items/json')
 def items_json():
     items = session.query(Item).all()
     return jsonify(items=[i.serialize for i in items])
 
 
-# JSON for a specific item in a category.
+# JSON endpoint for a specific item in a category.
 @app.route('/catalog/categories/<int:category_id>/items/<int:item_id>/json')
 def item_json(category_id, item_id):
     """Return JSON for an item"""
@@ -138,7 +138,8 @@ def show_item(category_id, item_id):
     return render_template(
         'item.html',
         category=category,
-        item=item)
+        item=item,
+        user=login_session.get('username'))
 
 
 # Edit a category's item.
@@ -146,6 +147,11 @@ def show_item(category_id, item_id):
     '/catalog/<int:category_id>/items/<int:item_id>/edit',
     methods=['GET', 'POST'])
 def edit_item(category_id, item_id):
+    if not login_session.get('username'):
+        flash('You must be logged in to edit items!')
+        return redirect(
+            url_for('show_categories'))
+
     item = session.query(Item).filter_by(
         id=item_id, category_id=category_id
     ).one_or_none()
@@ -176,6 +182,11 @@ def edit_item(category_id, item_id):
     '/catalog/<int:category_id>/items/<int:item_id>/delete',
     methods=['GET', 'POST'])
 def delete_item(category_id, item_id):
+    if not login_session.get('username'):
+        flash('You must be logged in to delete items!')
+        return redirect(
+            url_for('show_categories'))
+
     category = session.query(Category).filter_by(
         id=category_id).one_or_none()
     item = session.query(Item).filter_by(
@@ -316,8 +327,6 @@ def connect():
     login_session['username'] = user_info_response.json()['name']
     login_session['picture'] = user_info_response.json()['picture']
     login_session['email'] = user_info_response.json()['email']
-
-    flash('Hi, {}. You are logged in!'.format(login_session['username']))
 
     return render_template(
         'login_success.html',
