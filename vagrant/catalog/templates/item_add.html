@@ -8,13 +8,14 @@
         <form action='{{ url_for("new_item") }}' method='post'>
             <input type="text" size="30" name="name" placeholder="Name"><br>
             <input type="text" size="30" name="description" placeholder="Description"><br>
-            <select class="form-control" name="category" id="categorySelection">
+            <select class="form-control" name="category" id="categorySelection" required>
+                <option value="" selected disabled>Select a category</option>
                 {% for category in categories %}
                 <option>{{ category.name }}</option>
                 {% endfor %}
             </select>
-            <input type="submit" value="Create">
-            <a href='{{ url_for("show_categories") }}'>Cancel</a>
+            <button type="submit" class="btn btn-primary">Create</button>
+            <a href='{{ url_for("show_categories") }}' class="btn btn-secondary">Cancel</a>
         </form>
     </div>
 </div>

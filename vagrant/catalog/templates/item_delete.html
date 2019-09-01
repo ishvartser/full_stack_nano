@@ -5,13 +5,13 @@
         <h1>Deleting Item</h1>
     </div>
     <div class="row">
-        <h4>Are you sure you want to delete {{ item.name }}?</h4>
+        <h4>Are you sure you want to delete "{{ item.name }}"?</h4>
     </div>
     <div class="row">
         <form action='{{ url_for("delete_item", category_id=category.id, item_id=item.id) }}' method='post'>
-            <input type='submit' value='Delete'>
+            <button type="submit" class="btn btn-danger">Delete</button>
         </form>
-        <a href='{{ url_for("show_category_items", category_id=category.id) }}'>Cancel</a>
+        <a href='{{ url_for("show_category_items", category_id=category.id) }}' class="btn btn-secondary">Cancel</a>
     </div>
 </div>
 {% endblock %}

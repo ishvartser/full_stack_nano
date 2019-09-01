@@ -43,13 +43,26 @@
     </nav>
     <div class="container-fluid">
         <div class="row">
-            {% with messages = get_flashed_messages() %}
-                {% if messages %}
-                <ul>
-                {% for message in messages %}
-                <li><strong>{{ message }}</strong></li>
+            {% with info_messages = get_flashed_messages(category_filter=["info"]) %}
+                {% if info_messages %}
+                {% for message in info_messages %}
+                <div class="col-md-12">
+                    <div class="alert alert-success" role="alert">
+                        {{ message }}
+                    </div>
+                </div>
                 {% endfor %}
-                </ul>
+                {% endif %}
+            {% endwith %}
+            {% with error_messages = get_flashed_messages(category_filter=["error"]) %}
+                {% if error_messages %}
+                {% for message in error_messages %}
+                <div class="col-md-12">
+                    <div class="alert alert-danger" role="alert">
+                        {{ message }}
+                    </div>
+                </div>
+                {% endfor %}
                 {% endif %}
             {% endwith %}
         </div>

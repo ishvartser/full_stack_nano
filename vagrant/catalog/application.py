@@ -70,7 +70,8 @@ def show_categories():
     current_time = datetime.datetime.utcnow()
     one_week_ago = current_time - datetime.timedelta(weeks=1)
     items = session.query(Item).filter(
-        Item.updated_on > one_week_ago).all()
+        Item.updated_on > one_week_ago).order_by(
+        Item.updated_on.desc()).all()
     return render_template(
         'category.html',
         categories=categories,
@@ -89,7 +90,8 @@ def show_category_items(category_id):
         'category_items.html',
         categories=categories,
         category=category,
-        items=items)
+        items=items,
+        user=login_session.get('username'))
 
 
 # Add a new category in the catalog.
@@ -97,14 +99,16 @@ def show_category_items(category_id):
 def new_category():
     if request.method == 'POST':
         category = Category(
-            name=request.form['name'], user_id=login_session['user_id'])
+            name=request.form['name'], user_id=login_session['google_id'])
         session.add(category)
-        flash('New Category %s created!' % category.name)
+        flash('New Category %s created!' % category.name, 'info')
         session.commit()
         return redirect(
             url_for('show_category_items', category_id=category.id))
     else:
-        return render_template('category_add.html')
+        return render_template(
+            'category_add.html',
+            user=login_session.get('username'))
 
 
 # Add a new item in the catalog.
@@ -117,15 +121,18 @@ def new_item():
             name=request.form['name'],
             description=request.form['description'],
             category_id=category.id,
-            user_id=login_session['user_id'])
-        session.add(category)
-        flash('New Item %s created!' % item.name)
+            user_id=login_session['google_id'])
+        session.add(item)
+        flash('New Item %s created!' % item.name, 'info')
         session.commit()
         return redirect(
             url_for('show_category_items', category_id=category.id))
     else:
         categories = session.query(Category).all()
-        return render_template('item_add.html', categories=categories)
+        return render_template(
+            'item_add.html',
+            categories=categories,
+            user=login_session.get('username'))
 
 
 # Show a description for a specific item in a category.
@@ -148,7 +155,7 @@ def show_item(category_id, item_id):
     methods=['GET', 'POST'])
 def edit_item(category_id, item_id):
     if not login_session.get('username'):
-        flash('You must be logged in to edit items!')
+        flash('You must be logged in to edit items!', 'error')
         return redirect(
             url_for('show_categories'))
 
@@ -159,22 +166,28 @@ def edit_item(category_id, item_id):
         id=category_id).one_or_none()
 
     if request.method == 'POST':
-        if request.form['name']:
-            item.name = request.form['name']
+        selected_category = session.query(Category).filter_by(
+            name=request.form['category']
+        ).one_or_none()
+        item.name = request.form['name']
+        item.description = request.form['description']
+        item.category_id = selected_category.id
         session.add(item)
         session.commit()
         flash('{category_name} Item {item_name} updated!'.format(
             category_name=category.name,
-            item_name=item.name))
+            item_name=item.name),
+            'info')
         return redirect(
-            url_for('show_category_items', category_id=category.id))
+            url_for('show_category_items', category_id=selected_category.id))
     else:
         categories = session.query(Category).all()
         return render_template(
             'item_edit.html',
             categories=categories,
             category=category,
-            item=item)
+            item=item,
+            user=login_session.get('username'))
 
 
 # Delete a category's item.
@@ -183,7 +196,7 @@ def edit_item(category_id, item_id):
     methods=['GET', 'POST'])
 def delete_item(category_id, item_id):
     if not login_session.get('username'):
-        flash('You must be logged in to delete items!')
+        flash('You must be logged in to delete items!', 'error')
         return redirect(
             url_for('show_categories'))
 
@@ -197,14 +210,16 @@ def delete_item(category_id, item_id):
         session.commit()
         flash('{category_name} item {item_name} deleted!'.format(
             category_name=category.name,
-            item_name=item.name))
+            item_name=item.name),
+            'info')
         return redirect(url_for(
             'show_category_items', category_id=category.id))
     else:
         return render_template(
             'item_delete.html',
             category=category,
-            item=item)
+            item=item,
+            user=login_session.get('username'))
 
 
 """AUTHENTICATION ENDPOINTS"""
@@ -242,10 +257,10 @@ def logout():
         del login_session['email']
         del login_session['picture']
         del login_session['provider']
-        flash('You have been logged out.')
+        flash('You have been logged out.', 'info')
         return redirect(url_for('show_categories'))
     else:
-        flash('Failed to revoke token for given user!')
+        flash('Failed to revoke token for given user!', 'error')
         return redirect(url_for('show_categories'))
 
 
