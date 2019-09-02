@@ -98,8 +98,11 @@ def show_category_items(category_id):
 @app.route('/catalog/new_category', methods=['GET', 'POST'])
 def new_category():
     if request.method == 'POST':
+        user = session.query(User).filter_by(
+            google_id=login_session['google_id']).first()
         category = Category(
-            name=request.form['name'], user_id=login_session['google_id'])
+            name=request.form['name'],
+            user_id=user.id)
         session.add(category)
         flash('New Category %s created!' % category.name, 'info')
         session.commit()
@@ -115,13 +118,15 @@ def new_category():
 @app.route('/catalog/new_item', methods=['GET', 'POST'])
 def new_item():
     if request.method == 'POST':
+        user = session.query(User).filter_by(
+            google_id=login_session['google_id']).first()
         category = session.query(Category).filter_by(
             name=request.form['category']).one_or_none()
         item = Item(
             name=request.form['name'],
             description=request.form['description'],
             category_id=category.id,
-            user_id=login_session['google_id'])
+            user_id=user.id)
         session.add(item)
         flash('New Item %s created!' % item.name, 'info')
         session.commit()
@@ -146,7 +151,8 @@ def show_item(category_id, item_id):
         'item.html',
         category=category,
         item=item,
-        user=login_session.get('username'))
+        user=login_session.get('username'),
+        user_id=login_session.get('google_id'))
 
 
 # Edit a category's item.
@@ -162,6 +168,13 @@ def edit_item(category_id, item_id):
     item = session.query(Item).filter_by(
         id=item_id, category_id=category_id
     ).one_or_none()
+
+    if item.user.google_id != login_session['google_id']:
+        flash('You must be the owner of "{}" to edit it!'.format(
+                item.name), 'error')
+        return redirect(
+            url_for('show_categories'))
+
     category = session.query(Category).filter_by(
         id=category_id).one_or_none()
 
@@ -204,6 +217,12 @@ def delete_item(category_id, item_id):
         id=category_id).one_or_none()
     item = session.query(Item).filter_by(
         id=item_id, category_id=category_id).one_or_none()
+
+    if item.user.google_id != login_session['google_id']:
+        flash('You must be the owner of "{}" to delete it!'.format(
+                item.name), 'error')
+        return redirect(
+            url_for('show_categories'))
 
     if request.method == 'POST':
         session.delete(item)
@@ -342,6 +361,18 @@ def connect():
     login_session['username'] = user_info_response.json()['name']
     login_session['picture'] = user_info_response.json()['picture']
     login_session['email'] = user_info_response.json()['email']
+
+    # Add the user information into our catalog database.
+    user = session.query(User).filter_by(
+        email=login_session['email']).one_or_none()
+
+    if not user:
+        user = User(
+            name=login_session['username'],
+            email=login_session['email'],
+            google_id=login_session['google_id'])
+        session.add(user)
+        session.commit()
 
     return render_template(
         'login_success.html',

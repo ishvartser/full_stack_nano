@@ -20,10 +20,11 @@ session = DBSession()
 
 
 # Create a user.
-def create_user(name, email):
+def create_user(name, email, google_id):
     user = User(
         name=name,
-        email=email
+        email=email,
+        google_id=google_id
     )
     session.add(user)
     session.commit()
@@ -54,10 +55,10 @@ def create_item(name, description, category, user):
     return item
 
 users = [
-    {'name': 'Jane Appleseed', 'email': 'jane.appleseed@gmail.com'},
-    {'name': 'Bo Crocker', 'email': 'bo.crocker@gmail.com'},
-    {'name': 'Clint Rosewood', 'email': 'clint.rosewood@gmail.com'},
-    {'name': 'Ann Nickols', 'email': 'ann.nickols@gmail.com'}
+    {'name': 'Jane Appleseed', 'email': 'jane.appleseed@gmail.com', 'google_id': '111'},
+    {'name': 'Bo Crocker', 'email': 'bo.crocker@gmail.com', 'google_id': '222'},
+    {'name': 'Clint Rosewood', 'email': 'clint.rosewood@gmail.com', 'google_id': '333'},
+    {'name': 'Ann Nickols', 'email': 'ann.nickols@gmail.com', 'google_id': '444'}
 ]
 
 catalog_golf = {
@@ -92,7 +93,8 @@ catalog_horseback_racing = {
 def create_catalog_row(catalog_user, catalog_category):
     user = create_user(
         name=catalog_user['name'],
-        email=catalog_user['email']
+        email=catalog_user['email'],
+        google_id=catalog_user['google_id']
     )
     category = create_category(
         name=catalog_category['name'],
