@@ -1,5 +1,4 @@
 import datetime
-import httplib2
 import json
 import random
 import requests
@@ -311,11 +310,14 @@ def connect():
     url = 'https://www.googleapis.com/oauth2/v1/tokeninfo?access_token={}' \
         .format(credentials.access_token)
 
-    http_obj = httplib2.Http()
-    result = json.loads(http_obj.request(url, 'GET')[1])
+    result = requests.get(
+        url, params={
+            'access_token': credentials.access_token,
+            'alt': 'json'}
+    )
 
     # Check for errors.
-    if result.get('error'):
+    if result.status_code != 200:
         response = make_response(json.dumps(result.get('error')), 500)
         response.headers['Content-Type'] = 'application/json'
         return response
